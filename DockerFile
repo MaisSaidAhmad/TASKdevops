@@ -1,0 +1,15 @@
+FROM alpine/git as clone
+WORKDIR /APP
+RUN git clone https://github.com/spring-projects/spring-petclinic.git
+
+FROM maven:3.5-jdk-8-alpine as bulid
+WORKDIR /APP
+COPY --from=clone /APP/spring-petclinic /APP
+RUN mvn install
+RUN kubectl -f main.yml
+#CMD "./mvnw package"
+
+FROM openjdk:8-jre-alpine
+WORKDIR /APP
+COPY --from=bulid /APP/target/spring-petclinic-2.4.0.BUILD-SNAPSHOT.jar /APP
+CMD ["java", "-jar","spring-petclinic-2.4.0.BUILD-SNAPSHOT.jar"]

@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: taskDeployment
+spec:
+  selector:
+    app: taskDeployment
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taskDeployment
+  labels:
+    name: taskDeployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: taskDeployment
+  template:
+    metadata:
+      labels:
+        app: taskDeployment
+    spec:
+      - containers:
+      - name: taskDeployment
+        image: mohamaddiwany/devopstaskimg
+        ports:
+        - containerPort: 8080
+      - containers:
+      - name: mysql
+        image: mysql:5.7.8
+        env:
+	         - name: MYSQL_USER
+	        value: petclinic
+	      - name: MYSQL_PASSWORD
+	        value: petclinic
+	      - name: MYSQL_ROOT_PASSWORD
+	        value: root
+	      - name: MYSQL_DATABASE
+	        value: petclinic
+        ports:
+        - containerPort: 3306
+          name: mysql
+      restartPolicy: Always
+---
+  apiVersion: v1
+  kind: ConfigMap
+    metadata:
+    name: dbcon
+  data:
+    MYSQL_ROOT_PASSWORD : "root"
+    MYSQL_ALLOW_EMPTY_PASSWORD : "true"
+    MYSQL_USER : "petclinic"
+    MYSQL_PASSWORD : "petclinic"
+    MYSQL_DATABASE : "petclinic"
+
+
+
